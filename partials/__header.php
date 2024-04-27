@@ -3,6 +3,7 @@
 $customer = new Customer();
 
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>

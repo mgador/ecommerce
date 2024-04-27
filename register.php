@@ -1,7 +1,6 @@
 <?php include('partials/__header.php'); ?>
 
-<?php $customer->registration(); ?>
-
+<?php $customer->customer_registration(); ?>
 <form action="" method="post">
     <input type="text" name="fname" id="fname" placeholder="Enter your First Name" required>
     <input type="text" name="lname" id="lname" placeholder="Enter your Last Name" required>
