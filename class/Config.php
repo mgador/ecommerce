@@ -1,4 +1,4 @@
-<?php
+<?php session_start();
 class Config {
     private $server = "mysql:host=localhost;dbname=ecommerce;";
     private $user = "root";

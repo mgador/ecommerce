@@ -1,6 +1,11 @@
-<?php require_once('class/Customer.php');
+<?php 
+require_once('class/Customer.php');
+require_once('class/Seller.php');
+require_once('class/Product.php');
 
 $customer = new Customer();
+$seller = new Seller();
+$product = new Product();
 
 ?>
 
@@ -12,3 +17,4 @@ $customer = new Customer();
     <title>Document</title>
 </head>
 <body>
+

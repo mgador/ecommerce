@@ -23,7 +23,7 @@ class Customer extends Config {
 
             // Insert the data into the database using prepared statements
             $connection = $this->openConnection();
-            $stmt = $connection->prepare("INSERT INTO customer_tbl (fname,lname,username,email,password) VALUES(?,?,?,?,?)");
+            $stmt = $connection->prepare("INSERT INTO customer_tbl (firstname,lastname,username,email,password) VALUES(?,?,?,?,?)");
             $stmt->execute([$fname,$lname,$username,$email,$hashedPassword]);
             $result = $stmt->rowCount();
 
@@ -37,36 +37,65 @@ class Customer extends Config {
 
     public function login() {
         if(isset($_POST['login'])) {
+            $connection = $this->openConnection();
+
             $email = $_POST['email'];
             $password = $_POST['password'];
-    
-            $connection = $this->openConnection();
-    
-            $customer_data = $this->checkCredentials($connection, 'customer_tbl', $email, $password);
-            if($customer_data) {
-                $this->set_session($customer_data);
-                $this->redirectAfterLogin();
-            } else {
-                $seller_data = $this->checkCredentials($connection, 'seller_tbl', $email, $password);
-                if($seller_data) {
-                    $this->set_session($seller_data);
+
+            $stmt = $connection->prepare("SELECT password FROM customer_tbl
+            WHERE email = ?");
+
+            $stmt->execute([$email]);
+            $userPass = $stmt->fetch();
+
+            if (password_verify($password, $userPass['password'])) {
+                $stmt = $connection->prepare("SELECT * FROM customer_tbl WHERE email = ?");
+                $stmt->execute([$email]);
+                $data = $stmt->fetch();
+        
+                $user_id = $data['customer_id'];
+                $stmt2  = $connection->prepare("SELECT * FROM seller_tbl WHERE user_id = ?");
+                $stmt2->execute([$user_id]);
+                $data2 = $stmt2->fetch();
+                $result2 = $stmt2->rowCount();
+
+                if($result2 > 0) {
+                    $this->set_session($data2);
                     $this->redirectAfterLogin();
                 } else {
-                    echo "Incorrect email or password";
+                    $this->set_session($data);
+                    $this->redirectAfterLogin();
                 }
+
+            } else {
+                echo "Incorrect Email or Password!";
             }
+
+            // $stmt = $connection->prepare("SELECT * FROM customer_tbl WHERE email = ? AND password = ?");
+            // $stmt->execute([$email,$password]);
+            // $data = $stmt->fetch();
+            // $result = $stmt->rowCount();
+
+            // if($result > 0) {
+            //     $user_id = $data['customer_id'];
+            //     $stmt2  = $connection->prepare("SELECT * FROM seller_tbl WHERE user_id = ?");
+            //     $stmt2->execute([$user_id]);
+            //     $data2 = $stmt2->fetch();
+            //     $result2 = $stmt2->rowCount();
+
+            //     if($result2 > 0) {
+            //         $this->set_session($data2);
+            //         $this->redirectAfterLogin();
+            //     } else {
+            //         $this->set_session($data);
+            //         $this->redirectAfterLogin();
+            //     }
+            // } else {
+            //     echo "Incorrect Email or Password!";
+            // }
         }
     }
-    
-    private function checkCredentials($connection, $table, $email, $password) {
-        $stmt = $connection->prepare("SELECT * FROM $table WHERE email = ?");
-        $stmt->execute([$email]);
-        $user_data = $stmt->fetch();
-        if ($user_data && password_verify($password, $user_data['password'])) {
-            return $user_data;
-        }
-        return null;
-    }
+
     
     private function redirectAfterLogin() {
         header("Location: home.php");
@@ -80,10 +109,10 @@ class Customer extends Config {
             session_start();
         }
         $_SESSION['userdata'] = array (
-            "id" => $array['id'],
+            "id" => isset($array['seller_id']) ? $array['seller_id'] : $array['customer_id'],
             "email" => $array['email'],
-            "fullname" => $array['firstname']." ".$array['lastname'],
-            "access" => $array['access']
+            "username" => $array['username'],
+            "fullname" => $array['firstname']." ".$array['lastname']
         );
         return $_SESSION['userdata'];
     }
