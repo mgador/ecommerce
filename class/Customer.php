@@ -35,6 +35,11 @@ class Customer extends Config {
         }
     }
 
+    public function customer_login() {
+
+        
+    }
+
     // Function to validate input (prevent SQL injection)
     private function validateInput($input) {
         $input = trim($input);
