@@ -1,4 +1,5 @@
 <?php require_once('Config.php');
+
 class Customer extends Config {
 
     public function customer_registration() {
