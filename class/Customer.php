@@ -35,9 +35,69 @@ class Customer extends Config {
         }
     }
 
-    public function customer_login() {
+    public function login() {
+        if(isset($_POST['login'])) {
+            $email = $_POST['email'];
+            $password = $_POST['password'];
+    
+            $connection = $this->openConnection();
+    
+            $customer_data = $this->checkCredentials($connection, 'customer_tbl', $email, $password);
+            if($customer_data) {
+                $this->set_session($customer_data);
+                $this->redirectAfterLogin();
+            } else {
+                $seller_data = $this->checkCredentials($connection, 'seller_tbl', $email, $password);
+                if($seller_data) {
+                    $this->set_session($seller_data);
+                    $this->redirectAfterLogin();
+                } else {
+                    echo "Incorrect email or password";
+                }
+            }
+        }
+    }
+    
+    private function checkCredentials($connection, $table, $email, $password) {
+        $stmt = $connection->prepare("SELECT * FROM $table WHERE email = ?");
+        $stmt->execute([$email]);
+        $user_data = $stmt->fetch();
+        if ($user_data && password_verify($password, $user_data['password'])) {
+            return $user_data;
+        }
+        return null;
+    }
+    
+    private function redirectAfterLogin() {
+        header("Location: home.php");
+        exit; 
+    }
+    
 
-        
+    public function set_session($array){
+
+        if (!isset($_SESSION)) {
+            session_start();
+        }
+        $_SESSION['userdata'] = array (
+            "id" => $array['id'],
+            "email" => $array['email'],
+            "fullname" => $array['firstname']." ".$array['lastname'],
+            "access" => $array['access']
+        );
+        return $_SESSION['userdata'];
+    }
+
+    public function get_session(){
+
+        if (!isset($_SESSION)) {
+            session_start();
+        }
+        if (isset($_SESSION['userdata'])) {
+            return $_SESSION['userdata'];
+        } else {
+            return null;
+        }
     }
 
     // Function to validate input (prevent SQL injection)
