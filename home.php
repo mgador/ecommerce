@@ -4,5 +4,5 @@
 <a href="logout.php">Logout</a>
 <a href="seller_register.php?id=<?= $_SESSION['userdata']['id'] ?>">Start Selling</a>
 <a href="add_product.php?id=<?= $_SESSION['userdata']['id'] ?>">Add Product</a>
-
+<a href="manage_product.php?id=<?= $_SESSION['userdata']['id'] ?>">Manage Product</a>
 <?php include('partials/__footer.php'); ?>

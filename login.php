@@ -15,4 +15,6 @@ if(isset($_SESSION['status'])) {
     <input type="submit" name="login" value="Login">
 </form>
 
+<a href="register.php">Register</a>
+
 <?php include('partials/__footer.php'); ?>
