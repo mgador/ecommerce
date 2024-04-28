@@ -14,4 +14,6 @@
     <input type="submit" name="register" value="Register">
 </form>
 
+<a href="login.php">Login</a>
+
 <?php include('partials/__footer.php'); ?>

@@ -4,7 +4,7 @@ class Customer extends Config {
 
     public function customer_registration() {
         if(isset($_POST['register'])) {
-            // Validate inputs
+
             $fname = $this->validateInput($_POST['fname']);
             $lname = $this->validateInput($_POST['lname']);
             $username = $this->validateInput($_POST['username']);
@@ -12,16 +12,13 @@ class Customer extends Config {
             $password = $this->validateInput($_POST['password']);
             $password2 = $this->validateInput($_POST['password2']);
 
-            // Check if passwords match
             if($password !== $password2) {
                 echo "Passwords do not match.";
                 return;
             }
 
-            // Hash the password
             $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 
-            // Insert the data into the database using prepared statements
             $connection = $this->openConnection();
             $stmt = $connection->prepare("INSERT INTO customer_tbl (firstname,lastname,username,email,password) VALUES(?,?,?,?,?)");
             $stmt->execute([$fname,$lname,$username,$email,$hashedPassword]);
@@ -70,36 +67,11 @@ class Customer extends Config {
             } else {
                 echo "Incorrect Email or Password!";
             }
-
-            // $stmt = $connection->prepare("SELECT * FROM customer_tbl WHERE email = ? AND password = ?");
-            // $stmt->execute([$email,$password]);
-            // $data = $stmt->fetch();
-            // $result = $stmt->rowCount();
-
-            // if($result > 0) {
-            //     $user_id = $data['customer_id'];
-            //     $stmt2  = $connection->prepare("SELECT * FROM seller_tbl WHERE user_id = ?");
-            //     $stmt2->execute([$user_id]);
-            //     $data2 = $stmt2->fetch();
-            //     $result2 = $stmt2->rowCount();
-
-            //     if($result2 > 0) {
-            //         $this->set_session($data2);
-            //         $this->redirectAfterLogin();
-            //     } else {
-            //         $this->set_session($data);
-            //         $this->redirectAfterLogin();
-            //     }
-            // } else {
-            //     echo "Incorrect Email or Password!";
-            // }
         }
     }
-
     
     private function redirectAfterLogin() {
         header("Location: home.php");
-        exit; 
     }
     
 
