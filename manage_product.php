@@ -11,9 +11,7 @@
     if(isset($_SESSION['delete_status'])) { 
         echo $_SESSION['delete_status'];
         unset($_SESSION['delete_status']);
-    } else {
-        echo '<script>alert("Session not set");</script>';
-    }
+    } 
 ?>
 
 <table>

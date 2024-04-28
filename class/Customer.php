@@ -35,27 +35,25 @@ class Customer extends Config {
     public function login() {
         if(isset($_POST['login'])) {
             $connection = $this->openConnection();
-
+    
             $email = $_POST['email'];
             $password = $_POST['password'];
-
-            $stmt = $connection->prepare("SELECT password FROM customer_tbl
-            WHERE email = ?");
-
+    
+            $stmt = $connection->prepare("SELECT password FROM customer_tbl WHERE email = ?");
             $stmt->execute([$email]);
             $userPass = $stmt->fetch();
-
-            if (password_verify($password, $userPass['password'])) {
+    
+            if ($userPass && password_verify($password, $userPass['password'])) {
                 $stmt = $connection->prepare("SELECT * FROM customer_tbl WHERE email = ?");
                 $stmt->execute([$email]);
                 $data = $stmt->fetch();
         
                 $user_id = $data['customer_id'];
-                $stmt2  = $connection->prepare("SELECT * FROM seller_tbl WHERE user_id = ?");
+                $stmt2 = $connection->prepare("SELECT * FROM seller_tbl WHERE user_id = ?");
                 $stmt2->execute([$user_id]);
                 $data2 = $stmt2->fetch();
                 $result2 = $stmt2->rowCount();
-
+    
                 if($result2 > 0) {
                     $this->set_session($data2);
                     $this->redirectAfterLogin();
@@ -63,12 +61,12 @@ class Customer extends Config {
                     $this->set_session($data);
                     $this->redirectAfterLogin();
                 }
-
             } else {
                 echo "Incorrect Email or Password!";
             }
         }
     }
+    
     
     private function redirectAfterLogin() {
         header("Location: home.php");
@@ -101,7 +99,58 @@ class Customer extends Config {
         }
     }
 
-    // Function to validate input (prevent SQL injection)
+    public function add_to_cart() {
+        if(isset($_POST['add_to_cart'])) {
+            
+            $customer_id = $_POST['customer_id'];
+            $product_id = $_POST['product_id'];
+            $item_name = $_POST['item_name'];
+            $qty = $_POST['quantity'];
+            $price = $_POST['price'];
+    
+            $total_price = $price * $qty;
+    
+            $connection = $this->openConnection();
+            
+            $stmt = $connection->prepare("SELECT * FROM cart_tbl WHERE customer_id = ? AND product_id = ?");
+            $stmt->execute([$customer_id, $product_id]);
+            $existing_item = $stmt->fetch();
+    
+            if($existing_item) {
+
+                $new_qty = $existing_item['qty'] + $qty;
+                $new_total_price = $existing_item['price'] + $total_price;
+    
+                $stmt = $connection->prepare("UPDATE cart_tbl SET qty = ?, price = ? WHERE customer_id = ? AND product_id = ?");
+                $stmt->execute([$new_qty, $new_total_price, $customer_id, $product_id]);
+                $result = $stmt->rowCount();
+    
+                if(!$result > 0) {
+                    echo "Failed to update cart";
+                }
+
+            } else {
+
+                $stmt = $connection->prepare("INSERT INTO cart_tbl (customer_id, product_id, item_name, qty, price) VALUES(?, ?, ?, ?, ?)");
+                $stmt->execute([$customer_id, $product_id, $item_name, $qty, $total_price]);
+                $result = $stmt->rowCount();
+    
+                if(!$result > 0) {
+                    echo "Failed to add to cart";
+                }
+            }
+        }
+    }
+
+    public function view_cart($id) {
+        $connection = $this->openConnection();
+        $stmt = $connection->prepare("SELECT * FROM cart_tbl WHERE customer_id = ?");
+        $stmt->execute([$id]);
+        $data = $stmt->fetchAll();
+
+        return $data;
+    }
+
     private function validateInput($input) {
         $input = trim($input);
         $input = stripslashes($input);

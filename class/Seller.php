@@ -6,7 +6,7 @@ class Seller extends Config {
     public function seller_register() {
 
         if(isset($_POST['register'])) {
-            // Validate and sanitize input data
+
             $user_id = $this->validateInput($_POST['user_id']);
             $username = $this->validateInput($_POST['username']);
             $email = $this->validateInput($_POST['email']);
@@ -15,7 +15,6 @@ class Seller extends Config {
             $address = $this->validateInput($_POST['address']);
             $phone_number = $this->validateInput($_POST['phone_number']);
 
-            // Proceed with the database operation
             $connection = $this->openConnection();
             $stmt = $connection->prepare("INSERT INTO seller_tbl (user_id,username,email,company_name,contact_name,address,phone_number) VALUES(?,?,?,?,?,?,?)");
             $stmt->execute([$user_id,$username,$email,$company_name,$contact_name,$address,$phone_number]);

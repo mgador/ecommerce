@@ -50,29 +50,6 @@ class Product extends Config {
         
     }
 
-    public function view_products($id) {
-        $connection = $this->openConnection();
-        $stmt = $connection->prepare("SELECT * FROM product_tbl WHERE added_by = ?");
-        $stmt->execute([$id]);
-        $data = $stmt->fetchAll();
-        
-        return $data;
-    }
-
-    public function view_single_product() {
-        if(isset($_POST['update'])) {
-
-            $product_id = $_POST['product_id'];
-
-            $connection = $this->openConnection();
-            $stmt = $connection->prepare("SELECT * FROM product_tbl WHERE product_id = ?");
-            $stmt->execute([$product_id]);
-            $data = $stmt->fetch();
-
-            return $data;
-        }
-    }
-
     public function update_product() {
         if(isset($_POST['update_product'])) {
             $product_id = $this->validateInput($_POST['product_id']);
@@ -125,8 +102,7 @@ class Product extends Config {
             } else {
                 $image_to_use = $old_image_filename;
             }
-            
-            // Update product information in the database
+
             $connection = $this->openConnection();
             $stmt = $connection->prepare("UPDATE product_tbl SET category_id=?, item_name=?, item_image=?, description=?, price=?, quantity=?, added_by=? WHERE product_id=?");
             $stmt->execute([$category_id, $item_name, $image_to_use, $description, $price, $stock_quantity, $added_by, $product_id]);
@@ -174,8 +150,47 @@ class Product extends Config {
             }
         }
     }
-    
 
+    public function view_available_products() {
+        $connection = $this->openConnection();
+        $stmt = $connection->prepare("SELECT * FROM product_tbl ORDER BY RAND()");
+        $stmt->execute();
+        $data = $stmt->fetchAll();
+
+        return $data;
+    }
+
+    public function view_products($id) {
+        $connection = $this->openConnection();
+        $stmt = $connection->prepare("SELECT * FROM product_tbl WHERE added_by = ?");
+        $stmt->execute([$id]);
+        $data = $stmt->fetchAll();
+        
+        return $data;
+    }
+
+    public function view_product_details($id) {
+        $connection = $this->openConnection();
+        $stmt = $connection->prepare("SELECT * FROM product_tbl WHERE product_id = ?");
+        $stmt->execute([$id]);
+        $data = $stmt->fetch();
+
+        return $data;
+    }
+
+    public function view_single_product() {
+        if(isset($_POST['update'])) {
+
+            $product_id = $_POST['product_id'];
+
+            $connection = $this->openConnection();
+            $stmt = $connection->prepare("SELECT * FROM product_tbl WHERE product_id = ?");
+            $stmt->execute([$product_id]);
+            $data = $stmt->fetch();
+
+            return $data;
+        }
+    }
     
     private function validateInput($input) {
         $input = trim($input);
